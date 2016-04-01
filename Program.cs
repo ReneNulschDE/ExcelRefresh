@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Excel=Microsoft.Office.Interop.Excel;
-using Microsoft.Office.Tools.Excel;
 using CommandLine;
 using CommandLine.Text;
 using System.IO;
@@ -66,6 +64,43 @@ namespace XLRefresh
 
         }
 
+        private static void disableBackgroundQueries(Excel.Workbook theWorkbook)
+        {
+
+            foreach (Microsoft.Office.Interop.Excel.WorkbookConnection i in theWorkbook.Connections)
+            {
+                switch (i.Type) 
+                {
+                    case Excel.XlConnectionType.xlConnectionTypeOLEDB:
+                        Console.WriteLine("Disable OleDBConnection refresh: {0}", i.Name);
+                        i.OLEDBConnection.BackgroundQuery = false;
+                        break;
+                    case Excel.XlConnectionType.xlConnectionTypeODBC:
+                        Console.WriteLine("Disable ODBCConnection refresh: {0}", i.Name);
+                        i.ODBCConnection.BackgroundQuery = false;
+                        break;
+                    case Excel.XlConnectionType.xlConnectionTypeTEXT:
+                        break;
+                    case Excel.XlConnectionType.xlConnectionTypeWEB:
+                        break;
+                    case Excel.XlConnectionType.xlConnectionTypeDATAFEED:
+                        break;
+                    case Excel.XlConnectionType.xlConnectionTypeMODEL:
+                        break;
+                    case Excel.XlConnectionType.xlConnectionTypeWORKSHEET:
+                        break;
+                    case Excel.XlConnectionType.xlConnectionTypeNOSOURCE:
+                        break;
+                    default:
+                        break;
+                }
+
+
+            }
+
+
+        }
+
         private static void refreshConnection(Excel.Workbook theWorkbook)
         {
             foreach (Microsoft.Office.Interop.Excel.WorkbookConnection i in theWorkbook.Connections)
@@ -77,7 +112,7 @@ namespace XLRefresh
         }
 
 
-        static void Main(string[] args)
+    static void Main(string[] args)
         {
             //http://commandline.codeplex.com/
             var options = new Options();
@@ -109,7 +144,7 @@ namespace XLRefresh
             object _missingValue = System.Reflection.Missing.Value;
             Microsoft.Office.Interop.Excel.Application excel = new Microsoft.Office.Interop.Excel.Application();
             Excel.Workbook theWorkbook = excel.Workbooks.Open(txtLocation,
-                                                            _missingValue,
+                                                            false,
                                                             false,
                                                             _missingValue,
                                                             _missingValue,
@@ -127,6 +162,7 @@ namespace XLRefresh
 
             if (options.All)
             {
+                disableBackgroundQueries(theWorkbook);
                 theWorkbook.RefreshAll();
             }
             else
